@@ -89,8 +89,8 @@ def myplayMusic():
 class Game:
     def __init__(self, canvas: tk.Canvas) -> None:
         self.name = ""
-        self.player1 = computerRandom(1, self)
-        self.player2 = Player(2, self)
+        self.player2 = GreedComputer(2, self)
+        self.player1 = Player(1, self)
         self.data = [10, 5, 5, 5, 5, 5, 10, 5, 5, 5, 5, 5]
         self.turn = True
         self.canvas = canvas
@@ -183,7 +183,14 @@ class Game:
             self.turn = not self.turn
         self.state = False
         print(self.checkWinner(), self.player1.point, self.player2.point)
-
+        for i in range(12):
+            self.canvas.itemconfigure(self.id[i], text=self.data[i])
+            if i != 0 and i != 6:
+                self.canvas.itemconfigure(
+                    imagCell[i],
+                    image=imgs[self.data[i] if self.data[i] < 10 else 10],
+                )
+        
         self.canvas.itemconfigure(play1Pnt, text=self.player1.point)
         self.canvas.itemconfigure(play2Pnt, text=self.player2.point)
         self.canvas.itemconfigure(playing, text=str(self.checkWinner()) + "WIN")
@@ -202,6 +209,8 @@ class Game:
     def moved(self, index, direc, canvas: tk.Canvas):
         if self.data[index] == 0:
             return 0
+        holdingVal = self.data[index]
+        self.data[index] = 0
         current = index + direc
         current %= 12
 
@@ -218,13 +227,13 @@ class Game:
         time.sleep(0.5)
         ## x = i % 6
         # y = i // 6
-        while self.data[index]:
+        while holdingVal:
             xCur, yCur = dataPoint[current]
             canvas.coords(currentPoint, xCur, yCur, xCur + 10, yCur + 10)
 
-            self.data[index] -= 1
+            holdingVal -= 1
             myplaySound()
-            canvas.itemconfigure(holding, text="Holding\n" + str(self.data[index]))
+            canvas.itemconfigure(holding, text="Holding\n" + str(holdingVal))
             self.data[current] += 1
             canvas.itemconfigure(self.id[current], text=self.data[current])
             if current != 0 and current != 6:
@@ -308,6 +317,77 @@ class computerRandom:
         self.game.select = 0
 
 
+class GreedComputer:
+    def __init__(self, team, game: Game) -> None:
+        self.game = game
+        self.team = team
+        self.name = "Computer"
+        self.point = 0
+
+    def moving(self):
+        self.game.canvas.coords(
+            turn, 100, 40 + (self.team - 1) * 200, 120, 60 + (self.team - 1) * 200
+        )
+        i = 1 - 6 + 6 * self.team + 1
+        direct = -1
+        if sum(self.game.data) != 70:
+            i , direct = self.findGreedMove()
+
+        self.game.direct = direct
+        self.game.select = i
+
+        self.point += self.game.moved(int(i), int(direct), self.game.canvas)
+        self.game.direct = 0
+        self.game.select = 0
+
+    def findGreedMove(self):
+        myData = self.game.data.copy()
+        maxPoint, maxI, maxDirect = -1, -1, -1
+        for i in range(1 - 6 + 6 * self.team, 6 - 6 + 6 * self.team):
+            for direct in (-1, 1):
+                val = -1
+                if myData[i] != 0:
+                    val = self.compute(myData.copy(), i, direct)
+                if val > maxPoint:
+                    maxPoint, maxI, maxDirect = val, i, direct
+        return maxI, maxDirect
+
+    def compute(self, myData, index, direc):
+        if myData[index] == 0:
+            return 0
+        holdingVal = myData[index]
+        myData[index] = 0
+        current = index + direc
+        current %= 12
+
+        while holdingVal:
+
+            holdingVal -= 1
+            myData[current] += 1
+
+            current += direc
+            current %= 12
+
+        if myData[current] == 0:
+            res = 0
+
+            while myData[current] == 0:
+                current += direc
+                current %= 12
+                if myData[current]:
+                    res += myData[current]
+                    myData[current] = 0
+                    current += direc
+                    current %= 12
+                else:
+                    return res
+            return res
+        elif current in (0, 6):
+            return 0
+        else:
+            return self.compute(myData, current, direc)
+
+
 def mouseEvent(event, g: Game):
     res = 0
     x, y = event.x, event.y
@@ -339,7 +419,7 @@ root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
 coord = 10, 50, 240, 210
 canvas = tk.Canvas(root, width=600, height=400, background="#F8C939", cursor="hand2")
-root.geometry("800x650") 
+root.geometry("800x650")
 # canvas.create_line(10, 5, 200, 50)
 canvas.create_arc(
     100,
@@ -434,8 +514,10 @@ tk.Button(root, text="start", command=startGame).place(x=300, y=100)
 def getName():
     if variable1.get() == "Human":
         g.player1 = Player(1, g)
-    else:
+    elif variable1.get() == "Random Computer":
         g.player1 = computerRandom(1, g)
+    else:
+        g.player1 = GreedComputer(1, g)
     print(g.player1)
     print(variable1.get())
     name = E.get()
@@ -447,19 +529,21 @@ E = tk.Entry(root)
 Label(root, text="Player 1 name: ", bg="#F0F0F0", fg="#000").place(x=150, y=10)
 E.place(x=245, y=10)
 B = Button(root, text="OK", command=getName)
-B.place(x=445, y=8)
+B.place(x=500, y=8)
 variable1 = StringVar(root)
 variable1.set("Computer")  # default value
 
-w1 = OptionMenu(root, variable1, "Human", "Computer")
+w1 = OptionMenu(root, variable1, "Human", "Random Computer", "Greed Computer")
 w1.place(x=340, y=6)
 
 
 def getName2():
     if variable2.get() == "Human":
         g.player2 = Player(2, g)
-    else:
+    elif variable2.get() == "Random Computer":
         g.player2 = computerRandom(2, g)
+    else:
+        g.player2 = GreedComputer(2, g)
     print(g.player2)
     name = E2.get()
     g.player2.name = name
@@ -470,12 +554,12 @@ E2 = tk.Entry(root)
 Label(root, text="Player 2 name: ", bg="#F0F0F0", fg="#000").place(x=150, y=50)
 E2.place(x=245, y=50)
 B2 = Button(root, text="OK", command=getName2)
-B2.place(x=445, y=48)
+B2.place(x=500, y=48)
 
 variable2 = StringVar(root)
 variable2.set("Computer")  # default value
 
-w = OptionMenu(root, variable2, "Human", "Computer")
+w = OptionMenu(root, variable2, "Human", "Random Computer", "Greed Computer")
 w.place(x=340, y=46)
 
 
@@ -487,6 +571,6 @@ def thread_fuc2():
 t2 = threading.Thread(target=thread_fuc2)
 t2.start()
 
-canvas.place(x = 100, y =150 )
+canvas.place(x=100, y=150)
 root.resizable(False, False)
 root.mainloop()
