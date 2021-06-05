@@ -146,6 +146,10 @@ class Game:
                         imagCell[i],
                         image=imgs[self.data[i] if self.data[i] < 10 else 10],
                     )
+
+            self.canvas.itemconfigure(play1Pnt, text=self.player1.point)
+            self.canvas.itemconfigure(play2Pnt, text=self.player2.point)
+
             self.loop()
 
     def loop(self):
@@ -512,17 +516,18 @@ tk.Button(root, text="start", command=startGame).place(x=300, y=100)
 #         t1.run()
 # tk.Button(root, text= "start", command=startGame).pack()
 def getName():
-    if variable1.get() == "Human":
-        g.player1 = Player(1, g)
-    elif variable1.get() == "Random Computer":
-        g.player1 = computerRandom(1, g)
-    else:
-        g.player1 = GreedComputer(1, g)
-    print(g.player1)
-    print(variable1.get())
-    name = E.get()
-    g.player1.name = name
-    canvas.itemconfigure(play1, text=name)
+    if not g.state:
+        if variable1.get() == "Human":
+            g.player1 = Player(1, g)
+        elif variable1.get() == "Random Computer":
+            g.player1 = computerRandom(1, g)
+        else:
+            g.player1 = GreedComputer(1, g)
+        print(g.player1)
+        print(variable1.get())
+        name = E.get()
+        g.player1.name = name
+        canvas.itemconfigure(play1, text=name)
 
 
 E = tk.Entry(root)
@@ -538,16 +543,18 @@ w1.place(x=340, y=6)
 
 
 def getName2():
-    if variable2.get() == "Human":
-        g.player2 = Player(2, g)
-    elif variable2.get() == "Random Computer":
-        g.player2 = computerRandom(2, g)
-    else:
-        g.player2 = GreedComputer(2, g)
-    print(g.player2)
-    name = E2.get()
-    g.player2.name = name
-    canvas.itemconfigure(play2, text=name)
+    if not g.state:
+
+        if variable2.get() == "Human":
+            g.player2 = Player(2, g)
+        elif variable2.get() == "Random Computer":
+            g.player2 = computerRandom(2, g)
+        else:
+            g.player2 = GreedComputer(2, g)
+        print(g.player2)
+        name = E2.get()
+        g.player2.name = name
+        canvas.itemconfigure(play2, text=name)
 
 
 E2 = tk.Entry(root)
