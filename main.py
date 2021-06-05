@@ -132,29 +132,28 @@ class Game:
         # self.resetGame()
 
     def resetGame(self):
-        if self.state == False:
-            self.state = True
-            self.player1.point = 0
-            self.player2.point = 0
-            self.data = [10, 5, 5, 5, 5, 5, 10, 5, 5, 5, 5, 5]
-            self.turn = True
-            print("ok")
-            for i in range(12):
-                self.canvas.itemconfigure(self.id[i], text=self.data[i])
-                if i != 0 and i != 6:
-                    self.canvas.itemconfigure(
-                        imagCell[i],
-                        image=imgs[self.data[i] if self.data[i] < 10 else 10],
-                    )
+        # if self.state == False:
+        self.state = True
+        self.player1.point = 0
+        self.player2.point = 0
+        self.data = [10, 5, 5, 5, 5, 5, 10, 5, 5, 5, 5, 5]
+        self.turn = True
+        print("ok")
+        for i in range(12):
+            self.canvas.itemconfigure(self.id[i], text=self.data[i])
+            if i != 0 and i != 6:
+                self.canvas.itemconfigure(
+                    imagCell[i],
+                    image=imgs[self.data[i] if self.data[i] < 10 else 10],
+                )
 
-            self.canvas.itemconfigure(play1Pnt, text=self.player1.point)
-            self.canvas.itemconfigure(play2Pnt, text=self.player2.point)
+        self.canvas.itemconfigure(play1Pnt, text=self.player1.point)
+        self.canvas.itemconfigure(play2Pnt, text=self.player2.point)
 
-            self.loop()
-
+        self.loop()
     def loop(self):
         print(self.data)
-        while sum(self.data) > 12:
+        while (self.data[0] + self.data[6] > 0) and self.state:
             if self.turn:
                 res = all(self.data[i] == 0 for i in range(1, 6))
                 if res:
@@ -198,7 +197,13 @@ class Game:
         self.canvas.itemconfigure(play1Pnt, text=self.player1.point)
         self.canvas.itemconfigure(play2Pnt, text=self.player2.point)
         self.canvas.itemconfigure(playing, text=str(self.checkWinner()) + "WIN")
-
+        self.loopWaits()
+    def loopWaits(self):
+        while not self.state:
+            # print('waiting ...')
+            pass
+        print("HAHA")
+        self.resetGame()
     def checkWinner(self):
         print("ok")
         self.player1.point += sum(self.data[1:6])
@@ -483,14 +488,20 @@ holding = canvas.create_text(
 
 
 def thread_fuc():
-    g.resetGame()
+    g.loopWaits()
 
+
+t1 = threading.Thread(target=thread_fuc)
+t1.start()
+
+def resetGame():
+    g.state = False
 
 def startGame():
+    print('hihi')
     if g.state == False:
-        t1 = threading.Thread(target=thread_fuc)
-        t1.start()
-
+        g.state = True
+        print('hihi')
 
 play1 = canvas.create_text(
     200, 50, text=g.player1.name, fill="#f00", font="Times 20 bold"
@@ -506,7 +517,8 @@ playing = canvas.create_text(50, 150, text="", fill="#f00", font="Times 20 bold"
 
 currentPoint = canvas.create_oval(100, 100, 110, 110, fill="red")
 
-tk.Button(root, text="start", command=startGame).place(x=300, y=100)
+tk.Button(root, text="start", command=startGame).place(x=250, y=100)
+tk.Button(root, text="Reset", command=resetGame).place(x=350, y=100)
 
 
 # def startGame():
