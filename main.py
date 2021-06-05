@@ -8,6 +8,7 @@ import random
 from playsound import playsound
 from PIL import ImageTk, Image
 import trace
+
 root = tk.Tk()
 
 global direcMouse
@@ -79,12 +80,15 @@ imgs = (
 
 def myplaySound():
     playsound("rock.mp3")
+
+
 def myplayMusic():
     playsound("music.mp3")
 
+
 class Game:
     def __init__(self, canvas: tk.Canvas) -> None:
-        self.name = ''
+        self.name = ""
         self.player1 = computerRandom(1, self)
         self.player2 = Player(2, self)
         self.data = [10, 5, 5, 5, 5, 5, 10, 5, 5, 5, 5, 5]
@@ -116,13 +120,15 @@ class Game:
                     )
                 )
             else:
-                self.id.append(canvas.create_text(
+                self.id.append(
+                    canvas.create_text(
                         x,
                         y,
                         text=0,
                         fill="darkblue",
                         font="Times 20 bold",
-                    ))
+                    )
+                )
         # self.resetGame()
 
     def resetGame(self):
@@ -136,7 +142,10 @@ class Game:
             for i in range(12):
                 self.canvas.itemconfigure(self.id[i], text=self.data[i])
                 if i != 0 and i != 6:
-                    self.canvas.itemconfigure(imagCell[i], image = imgs[self.data[i] if self.data[i] < 10 else 10] )
+                    self.canvas.itemconfigure(
+                        imagCell[i],
+                        image=imgs[self.data[i] if self.data[i] < 10 else 10],
+                    )
             self.loop()
 
     def loop(self):
@@ -157,7 +166,10 @@ class Game:
             for i in range(12):
                 self.canvas.itemconfigure(self.id[i], text=self.data[i])
                 if i != 0 and i != 6:
-                    self.canvas.itemconfigure(imagCell[i], image = imgs[self.data[i] if self.data[i] < 10 else 10] )
+                    self.canvas.itemconfigure(
+                        imagCell[i],
+                        image=imgs[self.data[i] if self.data[i] < 10 else 10],
+                    )
 
             if self.turn:
                 self.player1.moving()
@@ -195,9 +207,15 @@ class Game:
 
         canvas.itemconfigure(self.id[index], text=0)
         if index != 0 and index != 6:
-            self.canvas.itemconfigure(imagCell[index], image = imgs[0] )
-        canvas.coords(currentPoint, dataPoint[index][0], dataPoint[index][1], dataPoint[index][0] + 10, dataPoint[index][1] + 10)
-        time.sleep(.5)
+            self.canvas.itemconfigure(imagCell[index], image=imgs[0])
+        canvas.coords(
+            currentPoint,
+            dataPoint[index][0],
+            dataPoint[index][1],
+            dataPoint[index][0] + 10,
+            dataPoint[index][1] + 10,
+        )
+        time.sleep(0.5)
         ## x = i % 6
         # y = i // 6
         while self.data[index]:
@@ -210,7 +228,10 @@ class Game:
             self.data[current] += 1
             canvas.itemconfigure(self.id[current], text=self.data[current])
             if current != 0 and current != 6:
-                self.canvas.itemconfigure(imagCell[current], image = imgs[self.data[current] if self.data[current] < 10 else 10] )
+                self.canvas.itemconfigure(
+                    imagCell[current],
+                    image=imgs[self.data[current] if self.data[current] < 10 else 10],
+                )
 
             current += direc
             current %= 12
@@ -318,6 +339,7 @@ root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
 coord = 10, 50, 240, 210
 canvas = tk.Canvas(root, width=600, height=400, background="#F8C939", cursor="hand2")
+root.geometry("800x650") 
 # canvas.create_line(10, 5, 200, 50)
 canvas.create_arc(
     100,
@@ -379,12 +401,19 @@ holding = canvas.create_text(
 def thread_fuc():
     g.resetGame()
 
+
 def startGame():
     if g.state == False:
         t1 = threading.Thread(target=thread_fuc)
         t1.start()
-play1 = canvas.create_text(200, 50, text=g.player1.name, fill="#f00", font="Times 20 bold")
-play2 = canvas.create_text(200, 250, text=g.player2.name, fill="#f00", font="Times 20 bold")
+
+
+play1 = canvas.create_text(
+    200, 50, text=g.player1.name, fill="#f00", font="Times 20 bold"
+)
+play2 = canvas.create_text(
+    200, 250, text=g.player2.name, fill="#f00", font="Times 20 bold"
+)
 play1Pnt = canvas.create_text(300, 50, text=0, fill="blue", font="Times 20 bold")
 play2Pnt = canvas.create_text(300, 250, text=0, fill="blue", font="Times 20 bold")
 
@@ -393,7 +422,7 @@ playing = canvas.create_text(50, 150, text="", fill="#f00", font="Times 20 bold"
 
 currentPoint = canvas.create_oval(100, 100, 110, 110, fill="red")
 
-tk.Button(root, text= "start", command=startGame).pack()
+tk.Button(root, text="start", command=startGame).place(x=300, y=100)
 
 
 # def startGame():
@@ -403,54 +432,61 @@ tk.Button(root, text= "start", command=startGame).pack()
 #         t1.run()
 # tk.Button(root, text= "start", command=startGame).pack()
 def getName():
-    if variable1.get() == "Humpan":
-        g.player1 = Player(1,g)
+    if variable1.get() == "Human":
+        g.player1 = Player(1, g)
     else:
-        g.player1 = computerRandom(1,g)
+        g.player1 = computerRandom(1, g)
     print(g.player1)
     print(variable1.get())
     name = E.get()
     g.player1.name = name
-    canvas.itemconfigure(play1, text = name)
+    canvas.itemconfigure(play1, text=name)
+
+
 E = tk.Entry(root)
-E.pack(anchor = CENTER)
-B = Button(root, text = "OK", command=getName)
-B.pack(anchor = S)
+Label(root, text="Player 1 name: ", bg="#F0F0F0", fg="#000").place(x=150, y=10)
+E.place(x=245, y=10)
+B = Button(root, text="OK", command=getName)
+B.place(x=445, y=8)
 variable1 = StringVar(root)
-variable1.set("Computer") # default value
+variable1.set("Computer")  # default value
 
-w1= OptionMenu(root, variable1, "Human", "Computer")
-w1.pack()
-
+w1 = OptionMenu(root, variable1, "Human", "Computer")
+w1.place(x=340, y=6)
 
 
 def getName2():
     if variable2.get() == "Human":
-        g.player2 = Player(2,g)
+        g.player2 = Player(2, g)
     else:
-        g.player2 = computerRandom(2,g)
+        g.player2 = computerRandom(2, g)
     print(g.player2)
     name = E2.get()
     g.player2.name = name
-    canvas.itemconfigure(play2, text = name)
+    canvas.itemconfigure(play2, text=name)
+
 
 E2 = tk.Entry(root)
-E2.pack(anchor = CENTER)
-B2 = Button(root, text = "OK", command=getName2)
-B2.pack(anchor = S)
+Label(root, text="Player 2 name: ", bg="#F0F0F0", fg="#000").place(x=150, y=50)
+E2.place(x=245, y=50)
+B2 = Button(root, text="OK", command=getName2)
+B2.place(x=445, y=48)
 
 variable2 = StringVar(root)
-variable2.set("Computer") # default value
+variable2.set("Computer")  # default value
 
 w = OptionMenu(root, variable2, "Human", "Computer")
-w.pack()
+w.place(x=340, y=46)
+
 
 def thread_fuc2():
     while root.winfo_exists():
         myplayMusic()
 
+
 t2 = threading.Thread(target=thread_fuc2)
 t2.start()
 
-canvas.pack()
+canvas.place(x = 100, y =150 )
+root.resizable(False, False)
 root.mainloop()
