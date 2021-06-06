@@ -1,0 +1,10 @@
+Hi, chào các bạn, đây là trò chơi mang tên ô ăn quan, luật chơi là mỗi người lần lượt đi quân của mình.
+Đầu tiên là chọn 1 ô bên mình, đi sang trái hay phải tùy ý. cứ rải hết quân trong tay, nếu hết quân, có hai trường hợp xảy ra:
+1 là ô tiếp theo trống, ta ăn ô kế tiếp.
+2 là ô tiếp theo có quân, ta tiếp tục lấy hết quân trong ô đó đi tiếp.
+Lưu ý, nếu ô tiếp theo tới ô quan thì không đi tiếp được.
+
+Trò chơi kết thúc khi hai ô quan đều rỗng, ai nhiều điểm hơn sẽ thắng cuộc.
+Nếu bằng điểm sẽ hòa.
+
+Link tham khảo: https://vi.wikipedia.org/wiki/%C3%94_%C4%83n_quan

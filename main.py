@@ -1,4 +1,4 @@
-from os import truncate
+import sys
 from tkinter import *
 import tkinter as tk
 import time
@@ -7,7 +7,8 @@ from tkinter.constants import NW, S, SE
 import random
 from playsound import playsound
 from PIL import ImageTk, Image
-import trace
+
+flag = True
 
 root = tk.Tk()
 
@@ -153,7 +154,7 @@ class Game:
         self.loop()
     def loop(self):
         print(self.data)
-        while (self.data[0] + self.data[6] > 0) and self.state:
+        while (self.data[0] + self.data[6] > 0) and self.state and flag:
             if self.turn:
                 res = all(self.data[i] == 0 for i in range(1, 6))
                 if res:
@@ -199,11 +200,15 @@ class Game:
         self.canvas.itemconfigure(playing, text=str(self.checkWinner()) + "WIN")
         self.loopWaits()
     def loopWaits(self):
-        while not self.state:
+        while not self.state & flag:
             # print('waiting ...')
             pass
         print("HAHA")
-        self.resetGame()
+        if flag:
+            self.resetGame()
+        else:
+            print("exit")
+            sys.exit()
     def checkWinner(self):
         print("ok")
         self.player1.point += sum(self.data[1:6])
@@ -298,9 +303,9 @@ class Player:
         ):
             i = self.game.select
             direct = self.game.direct * (1.5 - self.team) * 2
-
-        self.point += self.game.moved(int(i), int(direct), self.game.canvas)
-        self.game.direct = 0
+        if flag:
+            self.point += self.game.moved(int(i), int(direct), self.game.canvas)
+            self.game.direct = 0
 
 
 class computerRandom:
@@ -338,7 +343,7 @@ class GreedComputer:
             turn, 100, 40 + (self.team - 1) * 200, 120, 60 + (self.team - 1) * 200
         )
         i = 1 - 6 + 6 * self.team + 1
-        direct = -1
+        direct = 1
         if sum(self.game.data) != 70:
             i , direct = self.findGreedMove()
 
@@ -369,7 +374,7 @@ class GreedComputer:
         current = index + direc
         current %= 12
 
-        while holdingVal:
+        while holdingVal and flag:
 
             holdingVal -= 1
             myData[current] += 1
@@ -380,7 +385,7 @@ class GreedComputer:
         if myData[current] == 0:
             res = 0
 
-            while myData[current] == 0:
+            while myData[current] == 0 and flag:
                 current += direc
                 current %= 12
                 if myData[current]:
@@ -394,7 +399,7 @@ class GreedComputer:
         elif current in (0, 6):
             return 0
         else:
-            return self.compute(myData, current, direc)
+            return self.compute(myData.copy(), current, direc)
 
 
 def mouseEvent(event, g: Game):
@@ -492,8 +497,10 @@ def thread_fuc():
 
 
 t1 = threading.Thread(target=thread_fuc)
-t1.start()
 
+t1.daemon = True
+
+t1.start()
 def resetGame():
     g.state = False
 
@@ -517,8 +524,8 @@ playing = canvas.create_text(50, 150, text="", fill="#f00", font="Times 20 bold"
 
 currentPoint = canvas.create_oval(100, 100, 110, 110, fill="red")
 
-tk.Button(root, text="start", command=startGame).place(x=250, y=100)
-tk.Button(root, text="Reset", command=resetGame).place(x=350, y=100)
+tk.Button(root, text="start", command=startGame, font= "Times 15 bold").place(x=250, y=100)
+tk.Button(root, text="Reset", command=resetGame, font= "Times 15 bold").place(x=350, y=100)
 
 
 # def startGame():
@@ -527,7 +534,7 @@ tk.Button(root, text="Reset", command=resetGame).place(x=350, y=100)
 #     if not g.state:
 #         t1.run()
 # tk.Button(root, text= "start", command=startGame).pack()
-def getName():
+def getName(Myname = ""):
     if not g.state:
         if variable1.get() == "Human":
             g.player1 = Player(1, g)
@@ -542,19 +549,19 @@ def getName():
         canvas.itemconfigure(play1, text=name)
 
 
-E = tk.Entry(root)
-Label(root, text="Player 1 name: ", bg="#F0F0F0", fg="#000").place(x=150, y=10)
-E.place(x=245, y=10)
-B = Button(root, text="OK", command=getName)
-B.place(x=500, y=8)
+E = tk.Entry(root, font= "Times 15 bold")
+Label(root, text="Player 1 name: ", bg="#F0F0F0", fg="#000", font= "Times 15 bold").place(x=70, y=10)
+E.place(x=220, y=10)
+B = Button(root, text="OK", command=getName, font= "Times 15 bold")
+B.place(x=700, y=8)
 variable1 = StringVar(root)
-variable1.set("Computer")  # default value
+variable1.set("Random Computer")  # default value
 
-w1 = OptionMenu(root, variable1, "Human", "Random Computer", "Greed Computer")
-w1.place(x=340, y=6)
+w1 = OptionMenu(root, variable1, "Human", "Random Computer", "Greed Computer", command=getName)
+w1.place(x=450, y=6)
+w1.configure(font="Times 15 bold")
 
-
-def getName2():
+def getName2(myname = ''):
     if not g.state:
 
         if variable2.get() == "Human":
@@ -569,27 +576,35 @@ def getName2():
         canvas.itemconfigure(play2, text=name)
 
 
-E2 = tk.Entry(root)
-Label(root, text="Player 2 name: ", bg="#F0F0F0", fg="#000").place(x=150, y=50)
-E2.place(x=245, y=50)
-B2 = Button(root, text="OK", command=getName2)
-B2.place(x=500, y=48)
+E2 = tk.Entry(root,font= "Times 15 bold")
+Label(root, text="Player 2 name: ", bg="#F0F0F0", fg="#000",font= "Times 15 bold").place(x=70, y=50)
+E2.place(x=220, y=50)
+B2 = Button(root, text="OK", command=getName2,font= "Times 15 bold")
+B2.place(x=700, y=46)
 
 variable2 = StringVar(root)
-variable2.set("Computer")  # default value
+variable2.set("Human")  # default value
 
-w = OptionMenu(root, variable2, "Human", "Random Computer", "Greed Computer")
-w.place(x=340, y=46)
+w = OptionMenu(root, variable2, "Human", "Random Computer", "Greed Computer",command=getName2)
+w.configure(font= "Times 15 bold")
+w.place(x=450, y=45)
 
 
 def thread_fuc2():
-    while root.winfo_exists():
+    while (flag):
         myplayMusic()
 
 
 t2 = threading.Thread(target=thread_fuc2)
+t2.daemon = True
 t2.start()
 
 canvas.place(x=100, y=150)
 root.resizable(False, False)
 root.mainloop()
+
+print('aaa')
+flag = False
+print(flag)
+# t1.join()
+# t2.join()
